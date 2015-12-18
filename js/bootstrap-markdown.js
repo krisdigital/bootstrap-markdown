@@ -1047,8 +1047,7 @@
 
             link = prompt(e.__localize('Insert Hyperlink'),'http://');
 
-            var urlRegex = new RegExp('^((http|https)://|(mailto:)|(//))[a-z0-9]', 'i');
-            if (link !== null && link !== '' && link !== 'http://' && urlRegex.test(link)) {
+            if (link !== null && link !== '') {
               var sanitizedLink = $('<div>'+link+'</div>').text();
 
               // transform selection and set the cursor into chunked text
@@ -1077,8 +1076,7 @@
 
             link = prompt(e.__localize('Insert Image Hyperlink'),'http://');
 
-            var urlRegex = new RegExp('^((http|https)://|(//))[a-z0-9]', 'i');
-            if (link !== null && link !== '' && link !== 'http://' && urlRegex.test(link)) {
+            if (link !== null && link !== '') {
               var sanitizedLink = $('<div>'+link+'</div>').text();
 
               // transform selection and set the cursor into chunked text
