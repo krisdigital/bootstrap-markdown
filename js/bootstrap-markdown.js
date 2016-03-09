@@ -1,8 +1,8 @@
 /* ===================================================
- * bootstrap-markdown.js v2.9.0
+ * bootstrap-markdown.js v2.10.0
  * http://github.com/toopay/bootstrap-markdown
  * ===================================================
- * Copyright 2013-2015 Taufan Aditya
+ * Copyright 2013-2016 Taufan Aditya
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,15 +161,19 @@
         this.$textarea.css('resize',this.$options.resize);
       }
 
-      this.$textarea
-        .on('focus',    $.proxy(this.focus, this))
-        .on('keypress', $.proxy(this.keypress, this))
-        .on('keyup',    $.proxy(this.keyup, this))
-        .on('change',   $.proxy(this.change, this))
-        .on('select',   $.proxy(this.select, this));
+      this.$textarea.on({
+          'focus' : $.proxy(this.focus, this),
+          'keyup' : $.proxy(this.keyup, this),
+          'change' : $.proxy(this.change, this),
+          'select' : $.proxy(this.select, this)
+      });
 
       if (this.eventSupported('keydown')) {
         this.$textarea.on('keydown', $.proxy(this.keydown, this));
+      }
+
+      if (this.eventSupported('keypress')) {
+        this.$textarea.on('keypress', $.proxy(this.keypress, this))
       }
 
       // Re-attach markdown data
@@ -229,6 +233,7 @@
     } else {
       $editor.removeClass('md-fullscreen-mode');
       $('body').removeClass('md-nooverflow');
+      this.$options.onFullscreenExit(this);
 
       if (this.$isPreview == true) this.hidePreview().showPreview()
     }
@@ -460,6 +465,29 @@
 
       // disable disabled buttons from options
       this.disableButtons(options.disabledButtons);
+
+      // enable dropZone if available and configured
+      if (options.dropZoneOptions) {
+        if (this.$editor.dropzone) {
+          options.dropZoneOptions.init = function() {
+            var caretPos = 0;
+            this.on('drop', function(e) {
+              caretPos = textarea.prop('selectionStart');
+            });
+            this.on('success', function(file, path) {
+              var text = textarea.val();
+              textarea.val(text.substring(0, caretPos) + '\n![description](' + path + ')\n' + text.substring(caretPos) );
+            });
+            this.on('error', function(file, error, xhr) {
+              console.log('Error:', error);
+            });
+          }
+          this.$textarea.addClass('dropzone');
+          this.$editor.dropzone(options.dropZoneOptions);
+        } else {
+          console.log('dropZoneOptions was configured, but DropZone was not detected.');
+        }
+      }
 
       // Trigger the onShow hook
       options.onShow(this);
@@ -927,6 +955,7 @@
     language: 'en',
     initialstate: 'editor',
     parser: null,
+    dropZoneOptions: null,
 
     /* Buttons Properties */
     buttons: [
@@ -1324,6 +1353,7 @@
     onFocus: function (e) {},
     onChange: function(e) {},
     onFullscreen: function(e) {},
+    onFullscreenExit: function(e) {},
     onSelect: function (e) {}
   };
 
